@@ -1,5 +1,12 @@
 version: '3.8'
 
+networks:
+  apps:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.10.0/24
+
 services:
   keycloak_db:
     image: postgres:14
@@ -11,6 +18,9 @@ services:
       - ./postgres-keycloak-data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    networks:
+      apps:
+        ipv4_address: 192.168.10.100
   keycloak:
     image: quay.io/keycloak/keycloak:21.1
     environment:
@@ -27,6 +37,9 @@ services:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json
     ports:
       - "8080:8080"
+    networks:
+      apps:
+        ipv4_address: 192.168.10.11
     depends_on:
       - keycloak_db
   frontend:
@@ -35,8 +48,26 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
+    networks:
+      apps:
+        ipv4_address: 192.168.10.12
     environment:
       REACT_APP_API_URL: http://localhost:8000
       REACT_APP_KEYCLOAK_URL: http://localhost:8080
       REACT_APP_KEYCLOAK_REALM: reports-realm
       REACT_APP_KEYCLOAK_CLIENT_ID: reports-frontend
+  api:
+    container_name: api-2
+    build:
+      context: ./api
+      dockerfile: Dockerfile.jvm
+    ports:
+      - "8000:8000"
+    environment:
+#      KEYCLOAK_URL: http://localhost:8080
+      KEYCLOAK_URL: http://192.168.10.11:8080
+    networks:
+      apps:
+        ipv4_address: 192.168.10.13
+
+
