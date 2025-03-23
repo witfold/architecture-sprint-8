@@ -64,8 +64,11 @@ services:
     ports:
       - "8000:8000"
     environment:
-#      KEYCLOAK_URL: http://localhost:8080
       KEYCLOAK_URL: http://192.168.10.11:8080
+      KEYCLOAK_ISSUER_URL: http://localhost:8080
+      KEYCLOAK_REALM: reports-realm
+      CLIENT_ID: reports-api
+      SECRET: oNwoLQdvJAvRcL89SydqCWCe5ry1jMgq
     networks:
       apps:
         ipv4_address: 192.168.10.13
